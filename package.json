@@ -1,18 +1,13 @@
 {
   "name": "html-page-version",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "品杰html页面更新检查工具",
   "main": "./dist/html-page-version.cjs.js",
   "module": "./dist/html-page-version.esm.js",
   "types": "./dist/index.d.ts",
   "type": "module",
-  "exports": {
-    "import": "./dist/html-page-version.esm.js",
-    "require": "./dist/html-page-version.cjs.js",
-    "types": "./dist/index.d.ts"
-  },
   "scripts": {
-    "style": "xcopy .\\src\\themes\\ .\\dist\\themes\\",
+    "style": "copy .\\src\\style.css .\\dist\\style.css /Y",
     "build": "rollup -c && npm run style",
     "pub": "npm run build && npm publish"
   },

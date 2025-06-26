@@ -1,0 +1,1 @@
+export const LOGNAME: string = "HtmlPageVersion";

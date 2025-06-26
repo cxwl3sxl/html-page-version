@@ -1,3 +1,5 @@
+import { LOGNAME } from './const';
+
 /**
  * HTML页面版本检查助手
  *
@@ -7,8 +9,7 @@
 export class HtmlPageVersion {
     private readonly _selector: string;
     private readonly _attribute: string | undefined;
-
-    private readonly LOGNAME: string = "HtmlPageVersion";
+    private _autoCheckInterval: number = -1;
 
     /**
      * Creates an instance of HtmlPageVersion.
@@ -21,7 +22,7 @@ export class HtmlPageVersion {
         this._attribute = attr;
     }
 
-    private readVersion(doc: Document): string | undefined {
+    private _readVersion(doc: Document): string | undefined {
         let ele: HTMLElement;
         if (this._selector.startsWith(".")) {
             ele = doc.getElementsByClassName(this._selector.slice(1))[0] as HTMLElement;
@@ -38,6 +39,18 @@ export class HtmlPageVersion {
         }
 
         return ele.innerText || undefined;
+    }
+
+    private _autoCheckUpdate() {
+        setTimeout(async () => {
+            try {
+                if (await this.checkUpdate()) return;
+                this._autoCheckUpdate();
+            }
+            catch (e) {
+                console.error(`[${LOGNAME}] 自动检查新版本时发生错误：`, e);
+            }
+        }, this._autoCheckInterval);
     }
 
     /**
@@ -76,20 +89,20 @@ export class HtmlPageVersion {
      */
     public async hasNewVersion(): Promise<boolean> {
         try {
-            console.debug(`[${this.LOGNAME}] 正在检查程序版本信息...`);
+            console.debug(`[${LOGNAME}] 正在检查程序版本信息...`);
             const url = window.location.pathname;
             const content = await fetch(url, { cache: 'no-cache' });
             if (!content.ok) return false;
             const text = await content.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(text, 'text/html');
-            const curVer = this.readVersion(document);
-            const newVer = this.readVersion(doc);
+            const curVer = this._readVersion(document);
+            const newVer = this._readVersion(doc);
             if (curVer === newVer) return false;
             return true;
         }
         catch (e) {
-            console.error(`[${this.LOGNAME}] 检查新版本时发生错误：`, e);
+            console.error(`[${LOGNAME}] 检查新版本时发生错误：`, e);
             return false;
         }
     }
@@ -100,15 +113,18 @@ export class HtmlPageVersion {
      * @param {number} [interval=5] 检查新版本的时间间隔，默认 5 分钟
      * @memberof HtmlPageVersion
      */
-    public autoCheckUpdate(interval: number = 5): void {
-        setTimeout(async () => {
-            try {
-                if (await this.checkUpdate()) return;
-                this.autoCheckUpdate(interval);
-            }
-            catch (e) {
-                console.error(`[${this.LOGNAME}] 自动检查新版本时发生错误：`, e);
-            }
-        }, interval * 60 * 1000);
+    public async setAutoCheck(interval: number = 5): Promise<void> {
+        if (interval <= 0) throw new Error("检查新版本的时间间隔必须大于 0 分钟");
+        console.info(`[${LOGNAME}] 已启用自动检查更新功能，时间间隔：${interval} 分钟`);
+        this._autoCheckInterval = interval * 60 * 1000;
+        try {
+            const hasNewVer = await this.checkUpdate();
+            if (hasNewVer) return;
+        }
+        catch {
+
+        }
+
+        this._autoCheckUpdate();
     }
 }
