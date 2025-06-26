@@ -1,0 +1,114 @@
+/**
+ * HTML页面版本检查助手
+ *
+ * @export
+ * @class HtmlPageVersion
+ */
+export class HtmlPageVersion {
+    private readonly _selector: string;
+    private readonly _attribute: string | undefined;
+
+    private readonly LOGNAME: string = "HtmlPageVersion";
+
+    /**
+     * Creates an instance of HtmlPageVersion.
+     * @param {string} selector 版本信息所在的元素选择器，支持 .className、#idName 或者 tagName
+     * @param {(string | undefined)} attr 版本信息所在的元素属性，如果为空则直接使用 InnerText 作为版本信息
+     * @memberof HtmlPageVersion
+     */
+    constructor(selector: string, attr: string | undefined) {
+        this._selector = selector;
+        this._attribute = attr;
+    }
+
+    private readVersion(doc: Document): string | undefined {
+        let ele: HTMLElement;
+        if (this._selector.startsWith(".")) {
+            ele = doc.getElementsByClassName(this._selector.slice(1))[0] as HTMLElement;
+        }
+        else if (this._selector.startsWith("#")) {
+            ele = doc.getElementById(this._selector.slice(1)) as HTMLElement;
+        }
+        else {
+            ele = doc.getElementsByTagName(this._selector)[0] as HTMLElement;
+        }
+        if (!ele) return undefined;
+        if (this._attribute) {
+            return ele.getAttribute(this._attribute) || undefined;
+        }
+
+        return ele.innerText || undefined;
+    }
+
+    /**
+     * 检查当前页面是否有新版本，如果有，则给出更新提示，提示用户刷新页面, 返回是否有更新
+     *
+     * @return {*}  {Promise<boolean>}
+     * @memberof HtmlPageVersion
+     */
+    public async checkUpdate(): Promise<boolean> {
+        const hasNewVer = await this.hasNewVersion();
+        if (!hasNewVer) return false;
+        const updateNoticeContainer = document.createElement('div');
+        updateNoticeContainer.className = 'update-notice-container';
+        const updateNoticeBox = document.createElement('div');
+        updateNoticeBox.className = 'update-notice-box';
+        const noticeText = document.createElement('div');
+        noticeText.innerText = '检测到系统有新版本，请立即更新！';
+        const updateButton = document.createElement('button');
+        updateButton.className = 'update-button';
+        updateButton.innerText = "立即刷新";
+        updateButton.addEventListener('click', () => {
+            window.location.reload();
+        });
+        updateNoticeBox.appendChild(noticeText);
+        updateNoticeBox.appendChild(updateButton);
+        updateNoticeContainer.appendChild(updateNoticeBox);
+        document.body.appendChild(updateNoticeContainer);
+        return true;
+    }
+
+    /**
+     * 检查当前页面是否有新版本，如果有，则返回 true
+     *
+     * @return {*}  {Promise<boolean>}
+     * @memberof HtmlPageVersion
+     */
+    public async hasNewVersion(): Promise<boolean> {
+        try {
+            console.debug(`[${this.LOGNAME}] 正在检查程序版本信息...`);
+            const url = window.location.pathname;
+            const content = await fetch(url, { cache: 'no-cache' });
+            if (!content.ok) return false;
+            const text = await content.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, 'text/html');
+            const curVer = this.readVersion(document);
+            const newVer = this.readVersion(doc);
+            if (curVer === newVer) return false;
+            return true;
+        }
+        catch (e) {
+            console.error(`[${this.LOGNAME}] 检查新版本时发生错误：`, e);
+            return false;
+        }
+    }
+
+    /**
+     * 开启自动检查新版本功能，单位 分钟
+     *
+     * @param {number} [interval=5] 检查新版本的时间间隔，默认 5 分钟
+     * @memberof HtmlPageVersion
+     */
+    public autoCheckUpdate(interval: number = 5): void {
+        setTimeout(async () => {
+            try {
+                if (await this.checkUpdate()) return;
+                this.autoCheckUpdate(interval);
+            }
+            catch (e) {
+                console.error(`[${this.LOGNAME}] 自动检查新版本时发生错误：`, e);
+            }
+        }, interval * 60 * 1000);
+    }
+}

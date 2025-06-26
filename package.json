@@ -1,0 +1,33 @@
+{
+  "name": "html-page-version",
+  "version": "1.0.1",
+  "description": "品杰html页面更新检查工具",
+  "main": "./dist/html-page-version.cjs.js",
+  "module": "./dist/html-page-version.esm.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    "import": "./dist/html-page-version.esm.js",
+    "require": "./dist/html-page-version.cjs.js",
+    "types": "./dist/index.d.ts"
+  },
+  "scripts": {
+    "style": "xcopy .\\src\\themes\\ .\\dist\\themes\\",
+    "build": "rollup -c && npm run style",
+    "pub": "rollup -c && npm publish"
+  },
+  "author": "四川品杰科技有限公司",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.21.0",
+    "@babel/plugin-proposal-class-properties": "^7.18.6",
+    "@babel/preset-env": "^7.20.2",
+    "@rollup/plugin-babel": "^6.0.3",
+    "rimraf": "^4.4.0",
+    "rollup": "^3.19.1",
+    "rollup-plugin-typescript2": "^0.34.1",
+    "tslib": "^2.5.0",
+    "typescript": "^4.9.5",
+    "rollup-plugin-dts": "^6.1.0"
+  }
+}
