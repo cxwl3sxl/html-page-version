@@ -30,7 +30,7 @@ export class HtmlPageVersion {
 
     private _formatVersion(version: string | undefined | null): string | undefined {
         if (!version) return undefined;
-        return version.trim().replace(/\s+/g, ' ');
+        return version.trim().replace(/\s+/g, ' ').toLocaleLowerCase();
     }
 
     private _readVersion(doc: Document): string | undefined {
