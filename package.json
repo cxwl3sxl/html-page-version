@@ -1,6 +1,6 @@
 {
   "name": "html-page-version",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "品杰html页面更新检查工具",
   "main": "./dist/html-page-version.cjs.js",
   "module": "./dist/html-page-version.esm.js",

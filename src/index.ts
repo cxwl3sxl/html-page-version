@@ -28,6 +28,11 @@ export class HtmlPageVersion {
         this._updateButtonText = updateButtonText || "立即刷新";
     }
 
+    private _formatVersion(version: string | undefined | null): string | undefined {
+        if (!version) return undefined;
+        return version.trim().replace(/\s+/g, ' ');
+    }
+
     private _readVersion(doc: Document): string | undefined {
         let ele: HTMLElement;
         if (this._selector.startsWith(".")) {
@@ -41,10 +46,10 @@ export class HtmlPageVersion {
         }
         if (!ele) return undefined;
         if (this._attribute) {
-            return ele.getAttribute(this._attribute) || undefined;
+            return this._formatVersion(ele.getAttribute(this._attribute)) || undefined;
         }
 
-        return ele.innerText || undefined;
+        return this._formatVersion(ele.innerText) || undefined;
     }
 
     private _autoCheckUpdate() {
