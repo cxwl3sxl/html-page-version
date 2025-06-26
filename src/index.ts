@@ -9,17 +9,23 @@ import { LOGNAME } from './const';
 export class HtmlPageVersion {
     private readonly _selector: string;
     private readonly _attribute: string | undefined;
+    private readonly _newVersionMessage: string;
+    private readonly _updateButtonText: string;
     private _autoCheckInterval: number = -1;
 
     /**
      * Creates an instance of HtmlPageVersion.
      * @param {string} selector 版本信息所在的元素选择器，支持 .className、#idName 或者 tagName
      * @param {(string | undefined)} attr 版本信息所在的元素属性，如果为空则直接使用 InnerText 作为版本信息
+     * @param {(string | undefined)} newVersionMessage 有新版本时给用户的提示信息，默认 "检测到系统有新版本，请立即更新！"
+     * @param {(string | undefined)} updateButtonText 用新版本时提示界面上的按钮文本，默认 "立即刷新"
      * @memberof HtmlPageVersion
      */
-    constructor(selector: string, attr: string | undefined) {
+    constructor(selector: string, attr: string | undefined = undefined, newVersionMessage: string = "检测到系统有新版本，请立即更新！", updateButtonText: string = "立即刷新") {
         this._selector = selector;
         this._attribute = attr;
+        this._newVersionMessage = newVersionMessage || "检测到系统有新版本，请立即更新！";
+        this._updateButtonText = updateButtonText || "立即刷新";
     }
 
     private _readVersion(doc: Document): string | undefined {
@@ -67,10 +73,10 @@ export class HtmlPageVersion {
         const updateNoticeBox = document.createElement('div');
         updateNoticeBox.className = 'update-notice-box';
         const noticeText = document.createElement('div');
-        noticeText.innerText = '检测到系统有新版本，请立即更新！';
+        noticeText.innerText = this._newVersionMessage;
         const updateButton = document.createElement('button');
         updateButton.className = 'update-button';
-        updateButton.innerText = "立即刷新";
+        updateButton.innerText = this._updateButtonText;
         updateButton.addEventListener('click', () => {
             window.location.reload();
         });
