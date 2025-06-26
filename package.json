@@ -1,6 +1,6 @@
 {
   "name": "html-page-version",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "品杰html页面更新检查工具",
   "main": "./dist/html-page-version.cjs.js",
   "module": "./dist/html-page-version.esm.js",
@@ -14,7 +14,7 @@
   "scripts": {
     "style": "xcopy .\\src\\themes\\ .\\dist\\themes\\",
     "build": "rollup -c && npm run style",
-    "pub": "rollup -c && npm publish"
+    "pub": "npm run build && npm publish"
   },
   "author": "四川品杰科技有限公司",
   "license": "ISC",
